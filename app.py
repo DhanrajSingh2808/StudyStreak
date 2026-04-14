@@ -9,20 +9,15 @@ from google.oauth2.service_account import Credentials
 # --- 1. Configuration & Setup ---
 st.set_page_config(page_title="Mock Streak", page_icon="🔥", layout="centered")
 
-# Define the exact columns for the app
 EXPECTED_COLS = ["Date", "User", "Mock Title", "Math", "English", "Reasoning", "GA", "Total Score", "Image URL"]
 
 # --- 2. Authentication & Connection ---
 @st.cache_resource
 def init_connection():
     try:
-        scopes = [
-            "https://www.googleapis.com/auth/spreadsheets",
-            "https://www.googleapis.com/auth/drive"
-        ]
+        scopes = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
         creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scopes)
         client = gspread.authorize(creds)
-        # Connect to the sheet using the URL from secrets
         return client.open_by_url(st.secrets["private"]["sheet_url"]).sheet1
     except Exception as e:
         st.error(f"Connection Error: {e}")
@@ -31,30 +26,21 @@ def init_connection():
 sheet = init_connection()
 
 # --- 3. Helper Functions ---
-@st.cache_data(ttl=60) # This tells the app to refresh data every 60 seconds automatically
+@st.cache_data(ttl=60)
 def load_data():
     try:
-        # Fetch all values from the sheet
         rows = sheet.get_all_values()
         if len(rows) > 1:
-            # Create DataFrame using the first row as headers
             df = pd.DataFrame(rows[1:], columns=rows[0])
-            
-            # Ensure all expected columns exist (in case of typos in Sheet)
             for col in EXPECTED_COLS:
-                if col not in df.columns:
-                    df[col] = 0
+                if col not in df.columns: df[col] = 0
             
-            # Convert numeric columns to proper numbers
             numeric_cols = ["Math", "English", "Reasoning", "GA", "Total Score"]
             for col in numeric_cols:
                 df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
-                
             return df
-        else:
-            return pd.DataFrame(columns=EXPECTED_COLS)
-    except Exception as e:
-        st.error(f"Error loading data: {e}")
+        return pd.DataFrame(columns=EXPECTED_COLS)
+    except:
         return pd.DataFrame(columns=EXPECTED_COLS)
 
 def upload_to_imgbb(image_file):
@@ -65,133 +51,146 @@ def upload_to_imgbb(image_file):
             "image": base64.b64encode(image_file.getvalue()).decode("utf-8")
         }
         response = requests.post(url, data=payload)
-        if response.status_code == 200:
-            return response.json()['data']['url']
-    except Exception as e:
-        st.error(f"Image Upload Error: {e}")
-    return None
+        return response.json()['data']['url'] if response.status_code == 200 else None
+    except:
+        return None
 
-def calculate_leaderboard(df):
-    if df.empty or 'Date' not in df.columns or df['Date'].isnull().all():
-        return pd.DataFrame(columns=["User", "Current Streak 🔥", "Avg Total 🎯", "Total Mocks 📚"])
+def get_user_stats(df, user):
+    if df.empty or user == "Select Name":
+        return 0, "Select your name to see your progress!"
     
-    leaderboard = []
-    # Drop empty dates and convert to proper date objects
-    temp_df = df.dropna(subset=['Date']).copy()
-    temp_df['Date'] = pd.to_datetime(temp_df['Date']).dt.date
+    user_df = df[df['User'] == user].copy()
+    user_df['Date'] = pd.to_datetime(user_df['Date']).dt.date
+    dates = sorted(list(set(user_df['Date'].tolist())), reverse=True)
+    
+    streak = 0
     today = datetime.now().date()
     
-    for user in temp_df['User'].unique():
-        user_data = temp_df[temp_df['User'] == user].sort_values(by="Date", ascending=False)
-        avg_total = round(user_data['Total Score'].astype(float).mean(), 2)
-        total_mocks = len(user_data)
-        
-        # Streak Logic
-        streak = 0
-        dates_logged = sorted(list(set(user_data['Date'].tolist())), reverse=True)
-        
-        if dates_logged:
-            # Check if most recent is today or yesterday
-            if dates_logged[0] >= today - timedelta(days=1):
-                current_check = dates_logged[0]
-                for d in dates_logged:
-                    if d == current_check:
-                        streak += 1
-                        current_check -= timedelta(days=1)
-                    else:
-                        break
-        
-        leaderboard.append({
-            "User": user,
-            "Current Streak 🔥": streak,
-            "Avg Total 🎯": avg_total,
-            "Total Mocks 📚": total_mocks
-        })
-        
-    return pd.DataFrame(leaderboard).sort_values(by="Current Streak 🔥", ascending=False)
+    if dates and (dates[0] == today or dates[0] == today - timedelta(days=1)):
+        curr = dates[0]
+        for d in dates:
+            if d == curr:
+                streak += 1
+                curr -= timedelta(days=1)
+            else: break
+
+    # Motivational Messages
+    if streak == 0: msg = "The best time to start was yesterday. The second best time is **now**! 🚀"
+    elif streak < 3: msg = "Good start! The first few days are the hardest. **Keep showing up.** 👊"
+    elif streak < 7: msg = "You're building a habit. Stay consistent, the results will follow! 📈"
+    elif streak < 15: msg = "Incredible momentum! You are outworking the competition. 🔥"
+    else: msg = "UNSTOPPABLE. You've become a machine. Let's get that selection! 👑"
+    
+    return streak, msg
 
 # --- 4. Main App UI ---
 st.title("🔥 Mock Streak Tracker")
 
-# Customize this list for your group
 USERS = ["Select Name", "Dhanraj", "Damneet", "Friend 3", "Friend 4"]
 current_user = st.selectbox("Who is logging in?", USERS)
 
 df = load_data()
-# Add a refresh button in the sidebar or top
+
+# Sidebar / Top Streak Display
+if current_user != "Select Name":
+    streak, message = get_user_stats(df, current_user)
+    st.info(f"**Current Streak:** {streak} Days | {message}")
+
 if st.button("🔄 Refresh Data"):
     st.cache_data.clear()
     st.rerun()
 
-tab1, tab2, tab3 = st.tabs(["📝 Log Mock", "🏆 Leaderboard", "📸 The Feed"])
+tab1, tab2, tab3, tab4 = st.tabs(["📝 Log Mock", "🏆 Leaderboard", "📸 The Feed", "📅 My Calendar"])
 
+# --- TAB 1: LOG MOCK ---
 with tab1:
     if current_user != "Select Name":
-        st.subheader(f"Log Performance: {current_user}")
-        
         with st.form("mock_form", clear_on_submit=True):
             log_date = st.date_input("Exam Date", datetime.now())
-            mock_title = st.text_input("Mock Title", placeholder="e.g., CGL Tier-1 Mock 10")
-            
+            mock_title = st.text_input("Mock Title")
             c1, c2 = st.columns(2)
             with c1:
                 math = st.number_input("Math", min_value=0.0, step=0.5)
-                reasoning = st.number_input("Reasoning", min_value=0.0, step=0.5)
+                reas = st.number_input("Reasoning", min_value=0.0, step=0.5)
             with c2:
-                english = st.number_input("English", min_value=0.0, step=0.5)
-                ga = st.number_input("General Awareness", min_value=0.0, step=0.5)
+                eng = st.number_input("English", min_value=0.0, step=0.5)
+                ga = st.number_input("GA", min_value=0.0, step=0.5)
             
-            screenshot = st.file_uploader("Upload Scorecard Screenshot", type=['png', 'jpg', 'jpeg'])
-            submitted = st.form_submit_button("Submit & Extend Streak 🚀")
-            
-            if submitted:
-                if not mock_title or screenshot is None:
-                    st.error("Missing Mock Title or Screenshot!")
-                else:
-                    total = math + english + reasoning + ga
-                    with st.spinner("Processing..."):
+            screenshot = st.file_uploader("Upload Scorecard", type=['png', 'jpg', 'jpeg'])
+            if st.form_submit_button("Submit & Extend Streak 🚀"):
+                if mock_title and screenshot:
+                    with st.spinner("Saving..."):
                         img_url = upload_to_imgbb(screenshot)
-                    
-                    if img_url:
-                        new_row = [str(log_date), current_user, mock_title, math, english, reasoning, ga, total, img_url]
-                        sheet.append_row(new_row)
-                        st.success(f"Great job! Total Score: {total}")
-                        st.balloons()
-                        st.cache_data.clear()
-                    else:
-                        st.error("Screenshot upload failed.")
-    else:
-        st.info("Select your name to begin logging.")
+                        if img_url:
+                            total = math + eng + reas + ga
+                            sheet.append_row([str(log_date), current_user, mock_title, math, eng, reas, ga, total, img_url])
+                            st.success("Logged! Your streak just grew.")
+                            st.balloons()
+                            st.cache_data.clear()
+                            st.rerun()
 
+# --- TAB 2: LEADERBOARD ---
 with tab2:
     st.subheader("Leaderboard")
-    lb_df = calculate_leaderboard(df)
-    if lb_df.empty:
-        st.info("No data available yet.")
-    else:
-        st.dataframe(lb_df, use_container_width=True, hide_index=True)
+    # (Simplified leaderboard logic for brevity)
+    lb_data = []
+    for u in df['User'].unique():
+        s, _ = get_user_stats(df, u)
+        lb_data.append({"User": u, "Streak 🔥": s, "Avg Score": round(df[df['User']==u]['Total Score'].mean(), 1)})
+    st.dataframe(pd.DataFrame(lb_data).sort_values("Streak 🔥", ascending=False), use_container_width=True, hide_index=True)
 
+# --- TAB 3: FEED ---
 with tab3:
     st.subheader("Community Feed")
-    if df.empty or 'Date' not in df.columns or df['Date'].isnull().all():
-        st.info("Feed is empty. Be the first to post!")
-    else:
-        # Sort feed by date
-        valid_feed = df.dropna(subset=['Date']).copy()
-        valid_feed['Date'] = pd.to_datetime(valid_feed['Date']).dt.date
-        recent_posts = valid_feed.sort_values(by="Date", ascending=False).head(15)
-        
-        for _, row in recent_posts.iterrows():
+    if not df.empty:
+        feed_df = df.copy().sort_values("Date", ascending=False).head(10)
+        for _, row in feed_df.iterrows():
             with st.container(border=True):
-                st.markdown(f"### {row['User']} | Total: {row['Total Score']}")
-                st.caption(f"📅 {row['Date']} • {row['Mock Title']}")
-                
-                # Metric display
-                m1, m2, m3, m4 = st.columns(4)
-                m1.metric("Math", row.get('Math', 0))
-                m2.metric("Eng", row.get('English', 0))
-                m3.metric("Reas", row.get('Reasoning', 0))
-                m4.metric("GA", row.get('GA', 0))
-                
-                if row.get('Image URL'):
-                    st.image(row['Image URL'], use_column_width=True)
+                st.write(f"**{row['User']}** scored **{row['Total Score']}**")
+                st.caption(f"{row['Date']} • {row['Mock Title']}")
+                st.image(row['Image URL'], use_column_width=True)
+
+# --- TAB 4: MY CALENDAR ---
+with tab4:
+    if current_user == "Select Name":
+        st.warning("Please select your name above to view your history.")
+    else:
+        st.subheader(f"History for {current_user}")
+        user_df = df[df['User'] == current_user].copy()
+        user_df['Date'] = pd.to_datetime(user_df['Date']).dt.date
+        
+        # Visual Grid (Current Month)
+        today = datetime.now().date()
+        start_of_month = today.replace(day=1)
+        logged_dates = user_df['Date'].unique()
+        
+        st.write("### Your Attendance")
+        # Creating a simple visual row of last 14 days
+        cols = st.columns(7)
+        for i in range(14):
+            check_date = today - timedelta(days=13-i)
+            with cols[i % 7]:
+                if check_date in logged_dates:
+                    st.write(f"✅\n{check_date.day}")
+                else:
+                    st.write(f"⚪\n{check_date.day}")
+        
+        st.divider()
+        
+        # Date Selector to see Details
+        st.write("### Review a Specific Test")
+        available_dates = sorted(user_df['Date'].unique(), reverse=True)
+        if available_dates:
+            selected_date = st.selectbox("Select a date to view your scorecard", available_dates)
+            day_mocks = user_df[user_df['Date'] == selected_date]
+            
+            for _, row in day_mocks.iterrows():
+                with st.expander(f"📊 {row['Mock Title']} (Score: {row['Total Score']})"):
+                    col1, col2 = st.columns(2)
+                    col1.metric("Math", row['Math'])
+                    col1.metric("Reasoning", row['Reasoning'])
+                    col2.metric("English", row['English'])
+                    col2.metric("GA", row['GA'])
+                    st.image(row['Image URL'], caption="Scorecard Screenshot", use_column_width=True)
+        else:
+            st.info("No mocks logged yet. Your calendar is waiting for its first ✅!")
