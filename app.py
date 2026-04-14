@@ -1,10 +1,3 @@
-This is a great catch. A streak tracker should feel like a "Map" of your progress, not just a list of numbers. Since today is **April 14, 2026**, we will set that as your "Day Zero." Every day that passes will automatically add a new circle to your grid.
-
-I have updated the attendance logic to be a **Growth Map**. It will start with one circle today and expand day by day.
-
-### The Complete "Growth Map" Version (`app.py`)
-
-```python
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
@@ -225,19 +218,3 @@ with tab4:
                 st.image(test_data['Image URL'], caption="Official Scorecard", use_column_width=True)
         else:
             st.info("Your history is currently empty. Complete a mock today to see your first entry!")
-```
-
-### What's improved:
-
-1.  **The Growth Grid:**
-    * It starts exactly on **April 14**. 
-    * As each day passes (April 15, 16, etc.), a new circle will automatically appear.
-    * If you log a mock, it turns green. If you miss it, it stays white.
-    * It shows the date under the circle (e.g., "Apr 14") so you always know where you are in the week.
-
-2.  **Prominent Review Section:**
-    * The dropdown now lists tests with the date **first** and prominently: ` 14 Apr | CGL Mock 1 (Score: 145)`.
-    * When you select a test, the date appears as a big header (`## Tuesday, 14 April 2026`) so it feels like looking at a diary entry.
-
-3.  **Witty Motivation:**
-    * The streak messages now scale from Day 0 up to Day 30+, shifting from "Start now" to "Absolute dominance."
