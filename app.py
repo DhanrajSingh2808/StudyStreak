@@ -368,7 +368,7 @@ def get_streak_info(df, user):
                     curr -= timedelta(days=1)
                 else:
                     break
-    msg = "Keep going! Selection is near. 👊" if streak > 0 else "Start your journey today!"
+    msg = "Keep going! 👊" if streak > 0 else "Thanda mat pad!"
     return streak, msg
 
 
@@ -414,7 +414,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-USERS = ["Select Name", "Dhanraj", "Damneet", "Friend 3", "Friend 4"]
+USERS = ["Select Name", "Dhanraj", "Nishant", "Naman", "Anon"]
 current_user = st.selectbox("", USERS, label_visibility="collapsed",
                              placeholder="— Select your name —")
 
@@ -748,14 +748,16 @@ with tab4:
                   color:#ff9c40; margin: 22px 0 10px;">
           ATTENDANCE GRID
         </p>""", unsafe_allow_html=True)
-
-        # Build grid HTML
+        
+        # 1. Initialize the string
         grid_html = '<div style="display:flex; flex-wrap:wrap; gap:2px;">'
+        
+        # 2. Build the cells
         for i in range(total_days):
             check_date = START_DATE + timedelta(days=i)
-            label = check_date.strftime('%b %d')
             if check_date in logged_dates:
                 delay = f"{i * 0.03:.2f}s"
+                # Ensure this is a clean string with NO extra markdown formatting around it
                 grid_html += f"""
                 <div class="flame-cell" style="animation-delay:{delay};">
                   {flame_svg(24)}
@@ -771,8 +773,11 @@ with tab4:
                     {check_date.strftime('%d')}
                   </span>
                 </div>"""
+        
+        # 3. Close the container
         grid_html += '</div>'
-
+        
+        # 4. RENDER WITH UNSAFE_ALLOW_HTML
         st.markdown(grid_html, unsafe_allow_html=True)
 
         # Legend
