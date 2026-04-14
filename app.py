@@ -31,20 +31,30 @@ def init_connection():
 sheet = init_connection()
 
 # --- 3. Helper Functions ---
+@st.cache_data(ttl=60) # This tells the app to refresh data every 60 seconds automatically
 def load_data():
     try:
-        records = sheet.get_all_records()
-        if records:
-            df = pd.DataFrame(records)
-            # Ensure all expected columns exist even if the sheet is missing some
+        # Fetch all values from the sheet
+        rows = sheet.get_all_values()
+        if len(rows) > 1:
+            # Create DataFrame using the first row as headers
+            df = pd.DataFrame(rows[1:], columns=rows[0])
+            
+            # Ensure all expected columns exist (in case of typos in Sheet)
             for col in EXPECTED_COLS:
                 if col not in df.columns:
-                    df[col] = None
+                    df[col] = 0
+            
+            # Convert numeric columns to proper numbers
+            numeric_cols = ["Math", "English", "Reasoning", "GA", "Total Score"]
+            for col in numeric_cols:
+                df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
+                
             return df
         else:
             return pd.DataFrame(columns=EXPECTED_COLS)
-    except Exception:
-        # Fallback if sheet is totally empty or uninitialized
+    except Exception as e:
+        st.error(f"Error loading data: {e}")
         return pd.DataFrame(columns=EXPECTED_COLS)
 
 def upload_to_imgbb(image_file):
@@ -108,6 +118,10 @@ USERS = ["Select Name", "Dhanraj", "Damneet", "Friend 3", "Friend 4"]
 current_user = st.selectbox("Who is logging in?", USERS)
 
 df = load_data()
+# Add a refresh button in the sidebar or top
+if st.button("🔄 Refresh Data"):
+    st.cache_data.clear()
+    st.rerun()
 
 tab1, tab2, tab3 = st.tabs(["📝 Log Mock", "🏆 Leaderboard", "📸 The Feed"])
 
