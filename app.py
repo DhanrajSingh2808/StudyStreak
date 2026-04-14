@@ -232,16 +232,12 @@ with tab4:
 1.  **The Growth Grid:**
     * It starts exactly on **April 14**. 
     * As each day passes (April 15, 16, etc.), a new circle will automatically appear.
-    * If you log a mock, it turns into 🟢. If you miss it, it stays ⚪.
+    * If you log a mock, it turns green. If you miss it, it stays white.
     * It shows the date under the circle (e.g., "Apr 14") so you always know where you are in the week.
 
 2.  **Prominent Review Section:**
-    * The dropdown now lists tests with the date **first** and prominently: `📅 14 Apr | CGL Mock 1 (Score: 145)`.
+    * The dropdown now lists tests with the date **first** and prominently: ` 14 Apr | CGL Mock 1 (Score: 145)`.
     * When you select a test, the date appears as a big header (`## Tuesday, 14 April 2026`) so it feels like looking at a diary entry.
 
 3.  **Witty Motivation:**
     * The streak messages now scale from Day 0 up to Day 30+, shifting from "Start now" to "Absolute dominance."
-
-This should feel much more intuitive. Since it's **April 14**, go ahead and log your first mock of the day. Let's see that first 🟢! 
-
-Is there a specific target score you're aiming for in your next full-length mock?
