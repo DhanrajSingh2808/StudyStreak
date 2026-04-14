@@ -39,12 +39,16 @@ def upload_to_imgbb(image_file):
     return None
 
 def calculate_leaderboard(df):
-    if df.empty:
+    # If the dataframe is empty or missing the 'Date' column, return empty leaderboard
+    if df.empty or 'Date' not in df.columns or df['Date'].isnull().all():
         return pd.DataFrame(columns=["User", "Current Streak 🔥", "Avg Total 🎯", "Total Mocks 📚"])
     
     leaderboard = []
+    # Convert to datetime and filter out any rows where Date might be empty
+    df = df.dropna(subset=['Date'])
     df['Date'] = pd.to_datetime(df['Date']).dt.date
     today = datetime.now().date()
+     
     
     for user in df['User'].unique():
         user_data = df[df['User'] == user].sort_values(by="Date", ascending=False)
