@@ -780,17 +780,6 @@ with tab4:
         # CRITICAL: This must have unsafe_allow_html=True
         st.markdown(full_grid_html, unsafe_allow_html=True)
 
-        # Legend
-        st.markdown(f"""
-        <div style="display:flex; gap:16px; margin:8px 0 20px; font-size:0.75rem; color:#7a7a8c;">
-          <span>🔥 Logged</span>
-          <span style="opacity:0.4;">⚫ Missed</span>
-          <span style="color:#ff6a00;">{len(logged_dates)} / {total_days} days</span>
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown('<hr style="border-color:rgba(255,106,0,0.15);">', unsafe_allow_html=True)
-
         # ── Review list ──
         st.markdown("""
         <p style="font-family:'Bebas Neue'; font-size:1.2rem; letter-spacing:0.1em;
