@@ -742,43 +742,43 @@ with tab4:
                 </div>
                 """, unsafe_allow_html=True)
 
-        # ── Attendance Grid ──
+# ── Attendance Grid ──
         st.markdown("""
         <p style="font-family:'Bebas Neue'; font-size:1.2rem; letter-spacing:0.1em;
                   color:#ff9c40; margin: 22px 0 10px;">
           ATTENDANCE GRID
         </p>""", unsafe_allow_html=True)
-        
-        # 1. Initialize the string
-        grid_html = '<div style="display:flex; flex-wrap:wrap; gap:2px;">'
-        
-        # 2. Build the cells
+
+        # Use a simple list to collect items, then join them at the end
+        grid_items = []
         for i in range(total_days):
             check_date = START_DATE + timedelta(days=i)
+            day_num = check_date.strftime('%d')
+            
             if check_date in logged_dates:
                 delay = f"{i * 0.03:.2f}s"
-                # Ensure this is a clean string with NO extra markdown formatting around it
-                grid_html += f"""
-                <div class="flame-cell" style="animation-delay:{delay};">
+                item = f"""
+                <div class="flame-cell" style="animation-delay:{delay}; display: inline-flex; flex-direction: column; align-items: center;">
                   {flame_svg(24)}
                   <span style="font-size:0.5rem; color:#ff9c40; margin-top:1px; font-family:'DM Sans';">
-                    {check_date.strftime('%d')}
+                    {day_num}
                   </span>
                 </div>"""
             else:
-                grid_html += f"""
-                <div class="cold-cell">
+                item = f"""
+                <div class="cold-cell" style="display: inline-flex; flex-direction: column; align-items: center; opacity: 0.35;">
                   {cold_svg(22)}
                   <span style="font-size:0.5rem; color:#3a3a4a; margin-top:1px; font-family:'DM Sans';">
-                    {check_date.strftime('%d')}
+                    {day_num}
                   </span>
                 </div>"""
-        
-        # 3. Close the container
-        grid_html += '</div>'
-        
-        # 4. RENDER WITH UNSAFE_ALLOW_HTML
-        st.markdown(grid_html, unsafe_allow_html=True)
+            grid_items.append(item)
+
+        # Join everything into one container string
+        full_grid_html = f'<div style="display:flex; flex-wrap:wrap; gap:8px;">{"".join(grid_items)}</div>'
+
+        # CRITICAL: This must have unsafe_allow_html=True
+        st.markdown(full_grid_html, unsafe_allow_html=True)
 
         # Legend
         st.markdown(f"""
