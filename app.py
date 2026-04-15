@@ -78,9 +78,9 @@ h1, h2, h3, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
 [data-testid="stTabs"] [role="tablist"] {
   background: var(--surface);
   border-radius: 14px;
-  padding: 4px;
+  padding: 6px 8px;
   border: 1px solid var(--border);
-  gap: 2px;
+  gap: 6px;
 }
 [data-testid="stTabs"] button[role="tab"] {
   color: var(--muted) !important;
@@ -89,6 +89,8 @@ h1, h2, h3, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
   border-radius: 10px !important;
   transition: all .25s ease !important;
   border: none !important;
+  padding: 8px 18px !important;
+  white-space: nowrap !important;
 }
 [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
   background: linear-gradient(135deg, var(--ember), #c43a00) !important;
@@ -270,25 +272,64 @@ label, [data-testid="stWidgetLabel"] p {
   50%       { filter: drop-shadow(0 0 8px #ffb347) drop-shadow(0 0 20px #ff6a00); }
 }
 
-/* ── Attendance cell active flame ── */
-.flame-cell {
+/* ── Attendance grid cells ── */
+.flame-active {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   margin: 3px;
-  animation: cell-pop 0.4s ease forwards;
+  cursor: default;
+  animation: cell-pop 0.5s cubic-bezier(.34,1.56,.64,1) both;
 }
-.flame-svg {
-  animation: flame-flicker 1.8s ease-in-out infinite, glow-pulse 2s ease-in-out infinite;
+.flame-active .fa-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 5px #ff6a00) drop-shadow(0 0 10px #ff4500);
+  animation: flame-flicker 2s ease-in-out infinite, glow-pulse 2.5s ease-in-out infinite;
   transform-origin: bottom center;
+  display: block;
 }
-.cold-cell {
+.flame-active .fa-label {
+  font-size: 0.48rem;
+  color: #ff9c40;
+  font-family: 'DM Sans', sans-serif;
+  margin-top: 1px;
+  letter-spacing: 0.02em;
+}
+.flame-cold {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   margin: 3px;
-  opacity: 0.35;
+  opacity: 0.28;
+  cursor: default;
 }
+.flame-cold .fc-icon {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: #2e2e3a;
+  border: 1px solid #3a3a4a;
+  display: block;
+}
+.flame-cold .fc-label {
+  font-size: 0.48rem;
+  color: #4a4a5a;
+  font-family: 'DM Sans', sans-serif;
+  margin-top: 2px;
+}
+
+/* ── Card animation classes (avoid inline animation: which gets stripped) ── */
+.anim-card { animation: slide-in 0.4s ease both; }
+.anim-d0  { animation-delay: 0s; }
+.anim-d1  { animation-delay: 0.07s; }
+.anim-d2  { animation-delay: 0.14s; }
+.anim-d3  { animation-delay: 0.21s; }
+.anim-d4  { animation-delay: 0.28s; }
+.anim-d5  { animation-delay: 0.35s; }
+.anim-d6  { animation-delay: 0.42s; }
+.anim-d7  { animation-delay: 0.49s; }
+.anim-d8  { animation-delay: 0.56s; }
+.anim-d9  { animation-delay: 0.63s; }
 
 /* ── Ember particles ── */
 .ember {
@@ -368,33 +409,23 @@ def get_streak_info(df, user):
                     curr -= timedelta(days=1)
                 else:
                     break
-    msg = "Keep going! 👊" if streak > 0 else "Thanda mat pad!"
+    msg = "Keep going! Selection is near. 👊" if streak > 0 else "Start your journey today!"
     return streak, msg
 
 
-def flame_svg(size=28):
-    """SVG flame icon for active day."""
-    return f"""
-    <svg class="flame-svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="fg" x1="12" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#ffed4a"/>
-          <stop offset="40%" stop-color="#ff9c40"/>
-          <stop offset="100%" stop-color="#ff4500"/>
-        </linearGradient>
-      </defs>
-      <path d="M12 2C12 2 7 8 7 13a5 5 0 0010 0c0-3-2-5-2-5s-1 2.5-3 2.5C10.5 12.5 9 11 9 11S12 7 12 2Z
-               M12 17.5a1.5 1.5 0 01-1.5-1.5c0-1 1.5-2.5 1.5-2.5s1.5 1.5 1.5 2.5A1.5 1.5 0 0112 17.5Z"
-            fill="url(#fg)"/>
-    </svg>"""
+def flame_active_cell(date_label):
+    """CSS+emoji flame cell for logged days — no SVG, Streamlit-safe."""
+    return f"""<div class="flame-active">
+      <span class="fa-icon">🔥</span>
+      <span class="fa-label">{date_label}</span>
+    </div>"""
 
-
-def cold_svg(size=22):
-    """Dim circle for inactive day."""
-    return f"""
-    <svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="8" fill="#2e2e3a" stroke="#3a3a4a" stroke-width="1.5"/>
-    </svg>"""
+def flame_cold_cell(date_label):
+    """Grey dot for unlogged days."""
+    return f"""<div class="flame-cold">
+      <div class="fc-icon"></div>
+      <span class="fc-label">{date_label}</span>
+    </div>"""
 
 
 # ─────────────────────────────────────────────
@@ -414,7 +445,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-USERS = ["Select Name", "Dhanraj", "Nishant", "Naman", "Anon"]
+USERS = ["Select Name", "Dhanraj", "Damneet", "Friend 3", "Friend 4"]
 current_user = st.selectbox("", USERS, label_visibility="collapsed",
                              placeholder="— Select your name —")
 
@@ -595,13 +626,13 @@ with tab2:
 
         streak_bar_pct = min(row['🔥 Streak'] * 10, 100)
 
+        delay_class = f"anim-d{min(i, 9)}"
         st.markdown(f"""
-        <div style="
+        <div class="anim-card {delay_class}" style="
           background:{bg}; border:1px solid {border};
           border-radius:16px; padding:16px 20px; margin-bottom:10px;
           backdrop-filter:blur(8px);
           {'box-shadow: 0 0 20px rgba(255,106,0,0.2);' if is_me else ''}
-          animation: slide-in 0.4s {i*0.08}s ease both; opacity:0; animation-fill-mode:forwards;
         ">
           <div style="display:flex; align-items:center; justify-content:space-between;">
             <div style="display:flex; align-items:center; gap:14px;">
@@ -654,11 +685,11 @@ with tab3:
                             padding:2px 8px; border-radius:20px; letter-spacing:0.05em;
                             margin-left:8px;">PB 🏆</span>""" if is_pb else ""
 
+            delay_class = f"anim-d{min(idx, 9)}"
             st.markdown(f"""
-            <div style="
+            <div class="anim-card {delay_class}" style="
               background: rgba(255,255,255,0.03); border:1px solid rgba(255,106,0,0.15);
               border-radius:18px; overflow:hidden; margin-bottom:16px;
-              animation: slide-in 0.4s {idx*0.07}s ease both; opacity:0; animation-fill-mode:forwards;
             ">
               <div style="padding:16px 20px 12px;">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start;">
@@ -742,7 +773,36 @@ with tab4:
                 </div>
                 """, unsafe_allow_html=True)
 
+        # ── Attendance Grid ──
+        st.markdown("""
+        <p style="font-family:'Bebas Neue'; font-size:1.2rem; letter-spacing:0.1em;
+                  color:#ff9c40; margin: 22px 0 10px;">
+          ATTENDANCE GRID
+        </p>""", unsafe_allow_html=True)
 
+        # Build grid HTML
+        grid_html = '<div style="display:flex; flex-wrap:wrap; gap:2px;">'
+        for i in range(total_days):
+            check_date = START_DATE + timedelta(days=i)
+            date_label = check_date.strftime('%d')
+            if check_date in logged_dates:
+                grid_html += flame_active_cell(date_label)
+            else:
+                grid_html += flame_cold_cell(date_label)
+        grid_html += '</div>'
+
+        st.markdown(grid_html, unsafe_allow_html=True)
+
+        # Legend
+        st.markdown(f"""
+        <div style="display:flex; gap:16px; margin:8px 0 20px; font-size:0.75rem; color:#7a7a8c;">
+          <span>🔥 Logged</span>
+          <span style="opacity:0.4;">⚫ Missed</span>
+          <span style="color:#ff6a00;">{len(logged_dates)} / {total_days} days</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown('<hr style="border-color:rgba(255,106,0,0.15);">', unsafe_allow_html=True)
 
         # ── Review list ──
         st.markdown("""
