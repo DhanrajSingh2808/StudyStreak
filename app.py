@@ -339,6 +339,35 @@ label, [data-testid="stWidgetLabel"] p {
   animation: float-up linear infinite;
   pointer-events: none;
 }
+
+/* ── Ice theme ── */
+@keyframes ice-pulse {
+  0%, 100% { box-shadow: 0 0 18px rgba(100,200,255,0.3), 0 0 50px rgba(80,180,255,0.1); }
+  50%       { box-shadow: 0 0 32px rgba(140,220,255,0.55), 0 0 70px rgba(100,200,255,0.2); }
+}
+@keyframes float-down {
+  0%   { opacity: 0;   transform: translateY(-20px) rotate(0deg)   scale(1); }
+  15%  { opacity: 1; }
+  85%  { opacity: 0.6; }
+  100% { opacity: 0;   transform: translateY(90px)  rotate(180deg) scale(0.4); }
+}
+@keyframes shard-drift {
+  0%,100% { transform: translateX(0px) rotate(0deg); }
+  33%     { transform: translateX(6px)  rotate(8deg); }
+  66%     { transform: translateX(-5px) rotate(-6deg); }
+}
+@keyframes ice-shimmer {
+  0%,100% { filter: drop-shadow(0 0 4px #60d4ff) drop-shadow(0 0 8px #a0e8ff); }
+  50%     { filter: drop-shadow(0 0 10px #b0f0ff) drop-shadow(0 0 22px #60d4ff); }
+}
+.ice-crystal {
+  position: absolute;
+  color: #a8e8ff;
+  font-size: 0.9rem;
+  animation: float-down linear infinite, shard-drift ease-in-out infinite;
+  pointer-events: none;
+  user-select: none;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -409,7 +438,7 @@ def get_streak_info(df, user):
                     curr -= timedelta(days=1)
                 else:
                     break
-    msg = "Keep going! 👊" if streak > 0 else "Start your streak!"
+    msg = "Keep going! 👊" if streak > 0 else "Maybe give a mock today!"
     return streak, msg
 
 
@@ -440,12 +469,12 @@ st.markdown("""
     🔥 MOCK STREAK
   </p>
   <p style="color:#7a7a8c; font-size:0.85rem; letter-spacing:0.15em; text-transform:uppercase; margin:4px 0 0;">
-    TRACK · COMPETE · DOMINATE
+    TRACK · COMPETE · IMPROVE
   </p>
 </div>
 """, unsafe_allow_html=True)
 
-USERS = ["Select Name", "Dhanraj", "Nishant", "Naman", "Anon"]
+USERS = ["Select Name", "Dhanraj", "Naman", "Nishant", "Anon"]
 current_user = st.selectbox("", USERS, label_visibility="collapsed",
                              placeholder="— Select your name —")
 
@@ -458,65 +487,55 @@ df = load_data()
 if current_user != "Select Name":
     streak, message = get_streak_info(df, current_user)
 
-    # Pick banner colour intensity based on streak
-    if streak >= 7:
-        glow_color = "rgba(255,100,0,0.7)"
-        ring_color = "#ff6a00"
-    elif streak >= 3:
-        glow_color = "rgba(255,130,0,0.5)"
-        ring_color = "#ff8c00"
+    if streak > 0:
+        # ── FIRE BANNER ──────────────────────────────
+        if streak >= 7:
+            ring_color = "#ff6a00"
+        elif streak >= 3:
+            ring_color = "#ff8c00"
+        else:
+            ring_color = "#ffb347"
+
+        ember_particles = "".join([
+            f"""<div class="ember" style="width:{3+i%4}px;height:{3+i%4}px;left:{10+i*11}%;bottom:{5+i%3*8}px;opacity:{0.6+i%3*0.15};animation-duration:{1.5+i*0.4}s;animation-delay:{i*0.25}s;"></div>"""
+            for i in range(8)
+        ])
+
+        st.markdown(f"""
+        <div style="position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(255,80,0,0.12) 0%,rgba(20,15,10,0.9) 100%);border:1px solid {ring_color};border-radius:20px;padding:22px 28px;margin:12px 0 18px;backdrop-filter:blur(10px);animation:ember-pulse 3s ease-in-out infinite;">
+          {ember_particles}
+          <div style="display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;">
+            <div>
+              <p style="margin:0;font-family:'Bebas Neue';font-size:0.85rem;letter-spacing:0.2em;color:#7a7a8c;text-transform:uppercase;">Current Streak</p>
+              <p style="margin:0;font-family:'Bebas Neue';font-size:4rem;background:linear-gradient(135deg,#ffed4a,#ff6a00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;">{streak} DAYS</p>
+              <p style="margin:4px 0 0;color:#c0b8b0;font-size:0.88rem;">{message}</p>
+            </div>
+            <div style="font-size:4.5rem;filter:drop-shadow(0 0 12px #ff6a00);animation:flame-flicker 1.8s ease-in-out infinite;transform-origin:bottom center;">🔥</div>
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+
     else:
-        glow_color = "rgba(255,160,0,0.3)"
-        ring_color = "#ffb347"
+        # ── ICE BANNER ──────────────────────────────
+        ice_glyphs = ["❄", "❅", "❆", "✦", "❄", "❅", "❆", "✦"]
+        ice_crystals = "".join([
+            f"""<div class="ice-crystal" style="left:{8+i*12}%;top:{-10+i%3*5}px;animation-duration:{2.2+i*0.5}s;animation-delay:{i*0.3}s;opacity:{0.5+i%3*0.2};font-size:{0.7+i%3*0.25}rem;">{ice_glyphs[i]}</div>"""
+            for i in range(8)
+        ])
 
-    # Ember particle HTML (purely decorative)
-    ember_particles = "".join([
-        f"""<div class="ember" style="
-              width:{3+i%4}px; height:{3+i%4}px;
-              left:{10+i*11}%;
-              bottom:{5+i%3*8}px;
-              opacity:{0.6+i%3*0.15};
-              animation-duration:{1.5+i*0.4}s;
-              animation-delay:{i*0.25}s;">
-            </div>"""
-        for i in range(8)
-    ])
-
-    st.markdown(f"""
-    <div style="
-      position:relative; overflow:hidden;
-      background: linear-gradient(135deg, rgba(255,80,0,0.12) 0%, rgba(20,15,10,0.9) 100%);
-      border: 1px solid {ring_color};
-      border-radius: 20px;
-      padding: 22px 28px;
-      margin: 12px 0 18px;
-      animation: ember-pulse 3s ease-in-out infinite;
-      backdrop-filter: blur(10px);
-    ">
-      {ember_particles}
-      <div style="display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1;">
-        <div>
-          <p style="margin:0; font-family:'Bebas Neue'; font-size:0.85rem;
-                    letter-spacing:0.2em; color:#7a7a8c; text-transform:uppercase;">
-            Current Streak
-          </p>
-          <p style="margin:0; font-family:'Bebas Neue'; font-size:4rem;
-                    background: linear-gradient(135deg,#ffed4a,#ff6a00);
-                    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-                    line-height:1; animation: count-up 0.6s cubic-bezier(.34,1.56,.64,1) both;">
-            {streak} DAYS
-          </p>
-          <p style="margin:4px 0 0; color:#c0b8b0; font-size:0.88rem; animation: slide-in 0.5s 0.3s ease both; opacity:0; animation-fill-mode:forwards;">
-            {message}
-          </p>
+        st.markdown(f"""
+        <div style="position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(80,180,255,0.08) 0%,rgba(10,15,25,0.92) 100%);border:1px solid rgba(100,200,255,0.35);border-radius:20px;padding:22px 28px;margin:12px 0 18px;backdrop-filter:blur(10px);animation:ice-pulse 3s ease-in-out infinite;">
+          {ice_crystals}
+          <div style="display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;">
+            <div>
+              <p style="margin:0;font-family:'Bebas Neue';font-size:0.85rem;letter-spacing:0.2em;color:#5a7a9c;text-transform:uppercase;">Current Streak</p>
+              <p style="margin:0;font-family:'Bebas Neue';font-size:4rem;background:linear-gradient(135deg,#e0f4ff,#60b4ff,#2080cc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;">0 DAYS</p>
+              <p style="margin:4px 0 0;color:#7aaabb;font-size:0.88rem;">Start today — break the ice! 🧊</p>
+            </div>
+            <div style="font-size:4.5rem;animation:ice-shimmer 2.5s ease-in-out infinite,shard-drift 4s ease-in-out infinite;">❄️</div>
+          </div>
         </div>
-        <div style="font-size:4.5rem; animation: flame-flicker 1.8s ease-in-out infinite;
-                    transform-origin: bottom center; filter: drop-shadow(0 0 12px #ff6a00);">
-          🔥
-        </div>
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 else:
     st.markdown("""
     <div style="
@@ -564,7 +583,7 @@ with tab1:
 
         with st.form("mock_form", clear_on_submit=True):
             log_date = st.date_input("Exam Date", datetime.now())
-            mock_title = st.text_input("Mock Title", placeholder="e.g. SSC CGL Full test 1 #12")
+            mock_title = st.text_input("Mock Title", placeholder="e.g. CGL Full Mock #12")
 
             st.markdown("<p style='color:#7a7a8c; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; margin:12px 0 4px;'>Section Scores</p>", unsafe_allow_html=True)
             c1, c2 = st.columns(2)
