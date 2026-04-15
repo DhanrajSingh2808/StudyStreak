@@ -1,10 +1,3 @@
-The reason the "X DAYS" text is getting masked by a solid block of color is due to cross-browser compatibility issues with CSS gradient text. Some browsers (like Firefox or certain mobile browsers) don't fully support the `-webkit-` prefix on its own and require the standard `background-clip: text` and `color: transparent` properties alongside it. If the browser drops the webkit rule, it just renders the gradient as a giant background box instead of applying it to the text.
-
-I have fixed this by updating the inline styles for **all** the gradient text elements in your code (the Streak Banners, the Main Header, Leaderboard, Feed, and Journey Stats) to include the standard properties and `display: inline-block;` to ensure the gradient wraps tightly around the text. 
-
-I haven't touched any other logic or styling. Here is your fully updated, drop-in replacement code:
-
-```python
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
@@ -854,5 +847,3 @@ with tab4:
             <div style="text-align:center; padding:32px; color:#7a7a8c;">
               No entries yet. Start logging to see your history!
             </div>""", unsafe_allow_html=True)
-
-```
