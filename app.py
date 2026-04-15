@@ -564,7 +564,7 @@ with tab1:
 
         with st.form("mock_form", clear_on_submit=True):
             log_date = st.date_input("Exam Date", datetime.now())
-            mock_title = st.text_input("Mock Title", placeholder="e.g. IBPS PO Mock #12")
+            mock_title = st.text_input("Mock Title", placeholder="e.g. SSC CGL Full test 1 #12")
 
             st.markdown("<p style='color:#7a7a8c; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; margin:12px 0 4px;'>Section Scores</p>", unsafe_allow_html=True)
             c1, c2 = st.columns(2)
