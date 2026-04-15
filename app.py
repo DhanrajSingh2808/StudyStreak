@@ -464,9 +464,8 @@ st.markdown("""
 <div style="text-align:center; padding: 8px 0 4px;">
   <p style="font-family:'Bebas Neue'; font-size:3.2rem; letter-spacing:0.1em;
             background: linear-gradient(135deg,#ffed4a,#ff9c40,#ff4500);
-            -webkit-background-clip:text; background-clip:text;
-            -webkit-text-fill-color:transparent; color:transparent;
-            display:inline-block; margin:0; line-height:1;">
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+            margin:0; line-height:1;">
     🔥 MOCK STREAK
   </p>
   <p style="color:#7a7a8c; font-size:0.85rem; letter-spacing:0.15em; text-transform:uppercase; margin:4px 0 0;">
@@ -502,13 +501,14 @@ if current_user != "Select Name":
             for i in range(8)
         ])
 
+        # Removed gradient text property, replaced with simple solid color: #ff9c40
         st.markdown(f"""
         <div style="position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(255,80,0,0.12) 0%,rgba(20,15,10,0.9) 100%);border:1px solid {ring_color};border-radius:20px;padding:22px 28px;margin:12px 0 18px;backdrop-filter:blur(10px);animation:ember-pulse 3s ease-in-out infinite;">
           {ember_particles}
           <div style="display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;">
             <div>
               <p style="margin:0;font-family:'Bebas Neue';font-size:0.85rem;letter-spacing:0.2em;color:#7a7a8c;text-transform:uppercase;">Current Streak</p>
-              <p style="margin:0;font-family:'Bebas Neue';font-size:4rem;background:linear-gradient(135deg,#ffed4a,#ff6a00);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;display:inline-block;line-height:1;">{streak} DAYS</p>
+              <p style="margin:0;font-family:'Bebas Neue';font-size:4rem;color:#ff9c40;line-height:1;">{streak} DAYS</p>
               <p style="margin:4px 0 0;color:#c0b8b0;font-size:0.88rem;">{message}</p>
             </div>
             <div style="font-size:4.5rem;filter:drop-shadow(0 0 12px #ff6a00);animation:flame-flicker 1.8s ease-in-out infinite;transform-origin:bottom center;">🔥</div>
@@ -524,13 +524,14 @@ if current_user != "Select Name":
             for i in range(8)
         ])
 
+        # Removed gradient text property, replaced with simple solid color: #60b4ff
         st.markdown(f"""
         <div style="position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(80,180,255,0.08) 0%,rgba(10,15,25,0.92) 100%);border:1px solid rgba(100,200,255,0.35);border-radius:20px;padding:22px 28px;margin:12px 0 18px;backdrop-filter:blur(10px);animation:ice-pulse 3s ease-in-out infinite;">
           {ice_crystals}
           <div style="display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;">
             <div>
               <p style="margin:0;font-family:'Bebas Neue';font-size:0.85rem;letter-spacing:0.2em;color:#5a7a9c;text-transform:uppercase;">Current Streak</p>
-              <p style="margin:0;font-family:'Bebas Neue';font-size:4rem;background:linear-gradient(135deg,#e0f4ff,#60b4ff,#2080cc);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;display:inline-block;line-height:1;">0 DAYS</p>
+              <p style="margin:0;font-family:'Bebas Neue';font-size:4rem;color:#60b4ff;line-height:1;">0 DAYS</p>
               <p style="margin:4px 0 0;color:#7aaabb;font-size:0.88rem;">Start today — break the ice! 🧊</p>
             </div>
             <div style="font-size:4.5rem;animation:ice-shimmer 2.5s ease-in-out infinite,shard-drift 4s ease-in-out infinite;">❄️</div>
@@ -666,9 +667,7 @@ with tab2:
             <div style="text-align:right;">
               <p style="margin:0; font-family:'Bebas Neue'; font-size:1.8rem;
                         background:linear-gradient(135deg,#ffed4a,#ff6a00);
-                        -webkit-background-clip:text; background-clip:text;
-                        -webkit-text-fill-color:transparent; color:transparent;
-                        display:inline-block;">
+                        -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
                 {row['🔥 Streak']} 🔥
               </p>
               <p style="margin:0; color:#7a7a8c; font-size:0.78rem;">avg {row['🎯 Avg Score']}</p>
@@ -723,9 +722,8 @@ with tab3:
                   <div style="text-align:right;">
                     <p style="margin:0; font-family:'Bebas Neue'; font-size:2rem;
                               background:linear-gradient(135deg,#ffed4a,#ff6a00);
-                              -webkit-background-clip:text; background-clip:text;
-                              -webkit-text-fill-color:transparent; color:transparent;
-                              display:inline-block; line-height:1;">
+                              -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+                              line-height:1;">
                       {row['Total Score']}
                     </p>
                     <p style="margin:0; color:#7a7a8c; font-size:0.72rem;">TOTAL</p>
@@ -786,8 +784,7 @@ with tab4:
                   <p style="margin:0; color:#7a7a8c; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em;">{label}</p>
                   <p style="margin:4px 0 0; font-family:'Bebas Neue'; font-size:1.9rem;
                             background:linear-gradient(135deg,#ffed4a,#ff6a00);
-                            -webkit-background-clip:text; background-clip:text;
-                            -webkit-text-fill-color:transparent; color:transparent; display:inline-block;">
+                            -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
                     {val}{suffix}
                   </p>
                 </div>
