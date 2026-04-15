@@ -409,7 +409,7 @@ def get_streak_info(df, user):
                     curr -= timedelta(days=1)
                 else:
                     break
-    msg = "Keep going! Selection is near. 👊" if streak > 0 else "Start your journey today!"
+    msg = "Keep going! 👊" if streak > 0 else "Start your streak!"
     return streak, msg
 
 
@@ -445,7 +445,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-USERS = ["Select Name", "Dhanraj", "Damneet", "Friend 3", "Friend 4"]
+USERS = ["Select Name", "Dhanraj", "Nishant", "Naman", "Anon"]
 current_user = st.selectbox("", USERS, label_visibility="collapsed",
                              placeholder="— Select your name —")
 
@@ -559,7 +559,7 @@ with tab1:
         st.markdown(f"""
         <p style="font-family:'Bebas Neue'; font-size:1.5rem; letter-spacing:0.08em;
                   color:#ff9c40; margin-bottom:8px;">
-          LOG TODAY'S BATTLE, {current_user.upper()}
+          LOG TODAY'S MOCK, {current_user.upper()}
         </p>""", unsafe_allow_html=True)
 
         with st.form("mock_form", clear_on_submit=True):
@@ -627,13 +627,9 @@ with tab2:
         streak_bar_pct = min(row['🔥 Streak'] * 10, 100)
 
         delay_class = f"anim-d{min(i, 9)}"
+        box_shadow = "box-shadow:0 0 20px rgba(255,106,0,0.2);" if is_me else ""
         st.markdown(f"""
-        <div class="anim-card {delay_class}" style="
-          background:{bg}; border:1px solid {border};
-          border-radius:16px; padding:16px 20px; margin-bottom:10px;
-          backdrop-filter:blur(8px);
-          {'box-shadow: 0 0 20px rgba(255,106,0,0.2);' if is_me else ''}
-        ">
+        <div class="anim-card {delay_class}" style="background:{bg};border:1px solid {border};border-radius:16px;padding:16px 20px;margin-bottom:10px;backdrop-filter:blur(8px);{box_shadow}">
           <div style="display:flex; align-items:center; justify-content:space-between;">
             <div style="display:flex; align-items:center; gap:14px;">
               <span style="font-size:1.6rem;">{medal}</span>
@@ -670,7 +666,7 @@ with tab3:
     st.markdown("""
     <p style="font-family:'Bebas Neue'; font-size:1.5rem; letter-spacing:0.08em;
               color:#ff9c40; margin-bottom:8px;">
-      RECENT BATTLES
+      RECENT MOCKS
     </p>""", unsafe_allow_html=True)
 
     if not df.empty:
@@ -808,7 +804,7 @@ with tab4:
         st.markdown("""
         <p style="font-family:'Bebas Neue'; font-size:1.2rem; letter-spacing:0.1em;
                   color:#ff9c40; margin-bottom:10px;">
-          PREVIOUS BATTLES
+          PREVIOUS MOCKS
         </p>""", unsafe_allow_html=True)
 
         if not user_df.empty:
